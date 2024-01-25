@@ -1,0 +1,5 @@
+name: ProjectA
+version: '${project.version}'
+main: nkk.mkk.Main
+api-version: '1.20'
+authors: [Nikita Makovskij]
