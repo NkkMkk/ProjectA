@@ -1,52 +1,44 @@
 package nkk.mkk.db;
 
 import nkk.mkk.Main;
+
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import org.bukkit.entity.Player;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.json.JSONObject;
 
 public class database {
 
-    public database() {
+    public database() {}
+
+    public String playerDataPath(UUID uuid) {
+        return Main.getPlugin().getDataFolder().getAbsolutePath() + "/db/players/" + uuid + ".json";
     }
 
-   /*
-    public Object playerDataGet(UUID uuid) throws FileNotFoundException {
-        Gson gson = new Gson();
-        File file = new File(Main.getPlugin().getDataFolder().getAbsolutePath() + "/players/" + uuid + ".json");
-        if (file.exists()){
-            Reader reader = new FileReader(file);
-            return gson.fromJson(reader, Note[].class);
-        }
-
-        return null;
-    }
-
-    public void playerDataSet(UUID uuid) throws FileNotFoundException {
-        Gson gson = new Gson();
-        File file = new File(Main.getPlugin().getDataFolder().getAbsolutePath() + "/players/" + uuid + ".json");
-        if (file.exists()){
-            Reader reader = new FileReader(file);
-        }
-    }
-
-    */
-
-    public void writeToJson(String key, Object value, String filePath) {
+    public void writeToJson(String key, Object value, String filePath) throws IOException {
         JSONObject obj = new JSONObject();
-        obj.put(key, value);
+        File f = new File(filePath); f.getParentFile().mkdirs();
 
+        if (f.exists()) {
+            String content = new String(Files.readAllBytes(Paths.get(filePath)));
+            obj = new JSONObject(content);
+        }
+
+        obj.put(key, value);
         try (FileWriter file = new FileWriter(filePath)) {
-            file.write(obj.toString());
+            file.write(obj.toString(4));
             file.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void playerDataCreate(Player p) {
-        writeToJson("uuid", p.getUniqueId(), Main.getPlugin().getDataFolder().getAbsolutePath() + "/players/" + p.getUniqueId() + ".json");
-        System.out.println("Player data create!");
+    public void playerDataCreate(UUID uuid) throws IOException {
+        writeToJson("username", Bukkit.getPlayer(uuid).getDisplayName(), playerDataPath(uuid));
     }
 }
